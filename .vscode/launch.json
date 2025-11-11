@@ -30,12 +30,15 @@
                 "-s",
                 "./mnt/backup",
                 "./mnt/backup",
-                "b17403dd-f4b3-4601-9514-f3bb56e90735",
+                "433bf6f5-f5e5-4682-9bf9-d6c10b47fec5",
                 "dummy_backup.sh",
-                "./mnt/backup/46/2025/rpi.img",
+                "./mnt/backup/52/2025/rpi.img",
                 "2048",
                 "512"
             ],
+            "env": {
+                "MIN_RETAIN": "2"
+            },
             "terminalKind": "integrated"
         },
         {
@@ -48,10 +51,13 @@
                 "-s",
                 "./mnt/backup",
                 "./mnt/backup",
-                "b17403dd-f4b3-4601-9514-f3bb56e90735",
+                "433bf6f5-f5e5-4682-9bf9-d6c10b47fec5",
                 "dummy_backup.sh",
-                "./mnt/backup/46/2025/rpi.img",
+                "./mnt/backup/52/2025/rpi.img"
             ],
+            "env": {
+                "MIN_RETAIN": "2"
+            },
             "terminalKind": "integrated"
         }
     ]

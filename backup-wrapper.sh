@@ -43,7 +43,7 @@ cleanup_old_images() {
     (( avail >= needed_bytes )) && return 0
 
     to_free=$((needed_bytes - avail))
-    mapfile -t all_files < <(find "$mount_point" -type f -printf '%T@ %p\n' | sort -n | awk '{print $2}')
+    mapfile -t all_files < <(sudo find "$mount_point" -type f -printf '%T@ %p\n' | sort -n | awk '{print $2}')
     
     local total=${#all_files[@]}
     local max_deletable=$((total - min_retain))
@@ -68,7 +68,7 @@ cleanup_old_images() {
     echo "Cleaning ${#files_to_delete[@]} old file(s) to free space..." >&2
     for file in "${files_to_delete[@]}"; do
         echo "Deleting: $file" >&2
-        rm -f "$file"
+        sudo rm -f "$file"
     done
 }
 
