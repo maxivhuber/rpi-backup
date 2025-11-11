@@ -1,0 +1,58 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Debug Initial Backup Dummy Script",
+            "program": "dummy_backup.sh",
+            "args": [
+                "-i",
+                "./mnt/backup/46/2025/rpi.img,2048,512"
+            ]
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Debug Incremental Backup Dummy Script",
+            "program": "dummy_backup.sh",
+            "args": [
+                "./mnt/backup/46/2025/rpi.img"
+            ]
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Debug Initial Backup Wrapper Script",
+            "program": "backup-wrapper.sh",
+            "args": [
+                "--initial",
+                "-s",
+                "./mnt/backup",
+                "./mnt/backup",
+                "b17403dd-f4b3-4601-9514-f3bb56e90735",
+                "dummy_backup.sh",
+                "./mnt/backup/46/2025/rpi.img",
+                "2048",
+                "512"
+            ],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Debug Incremental Backup Wrapper Script",
+            "program": "backup-wrapper.sh",
+            "args": [
+                "--incremental",
+                "-s",
+                "./mnt/backup",
+                "./mnt/backup",
+                "b17403dd-f4b3-4601-9514-f3bb56e90735",
+                "dummy_backup.sh",
+                "./mnt/backup/46/2025/rpi.img",
+            ],
+            "terminalKind": "integrated"
+        }
+    ]
+}
