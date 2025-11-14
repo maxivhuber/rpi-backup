@@ -108,7 +108,6 @@ Notes:
    sudo systemctl daemon-reload
    ```
 
-   Note: Using `/usr/local/bin` is standard for custom system‑wide scripts.
 
 4. **Enable the timers**
    ```
