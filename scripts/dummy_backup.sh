@@ -13,8 +13,8 @@ Usage:
   Initial:     ./image-backup.sh -i <image-path>[,<size-MB>[,<extra-MB>]]
   Incremental: ./image-backup.sh <image-path>
 
-In initial mode, creates a 1MB dummy file.
-In incremental mode, appends 100KB to the file.
+In initial mode, creates a 8MB dummy file.
+In incremental mode, appends 512KB to the file.
 EOF
     exit 0
 fi
@@ -47,17 +47,17 @@ main() {
         # Ensure parent directory exists
         mkdir -p "$(dirname "$image_path")"
 
-        # Create a 1MB dummy file (filled with zeros)
-        echo "Creating 1MB dummy file at $image_path" >&2
-        dd if=/dev/zero of="$image_path" bs=1M count=1 status=none
+        # Create a 8MB dummy file (filled with zeros)
+        echo "Creating 8MB dummy file at $image_path" >&2
+        dd if=/dev/zero of="$image_path" bs=1M count=8 status=none
     else
-        # Append 100KB (102400 bytes = 100 * 1024)
-        echo "Appending 100KB to $image_path" >&2
+        # Append 512KB (524288 bytes = 512 * 1024)
+        echo "Appending 512KB to $image_path" >&2
         if [[ ! -f "$image_path" ]]; then
             echo "Error: file does not exist for incremental update: $image_path" >&2
             exit 1
         fi
-        dd if=/dev/zero of="$image_path" bs=1024 count=100 status=none oflag=append conv=notrunc
+        dd if=/dev/zero of="$image_path" bs=1024 count=512 status=none oflag=append conv=notrunc
     fi
 }
 

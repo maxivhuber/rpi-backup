@@ -1,102 +1,140 @@
 # Backup Testing Instructions
 
-## How to Use
+This project provides scripts to test and automate Raspberry Pi image backups.  
+You can simulate backups with a dummy image or run real scheduled backups via systemd.
 
-### For testing:
+---
 
-To quickly set up a dummy backup device for testing:
+## Quick Test Setup
 
-1. Create a dummy test image:
-   ```bash
+1. **Create a dummy backup device**
+   ```
    sudo bash create-test-img.sh
    ```
-   This creates a **dummy backup device** and prints the **UUID** on the last line.
+   Prints a fake but usable device UUID on the last line.
 
-2. Run the initial backup test using the wrapper:
-   ```bash
+2. **Run a sample (initial) backup**
+   ```
    sudo MIN_RETAIN=2 bash backup-wrapper.sh --initial ...
    ```
-   *(See details below for full usage examples.)*
+   (See usage examples below for options.)
 
 ---
 
 ## `dummy_backup.sh`
 
-The `dummy_backup.sh` script is the **low-level backup test script**.  
-If you want to run it directly, you must first mount the dummy device created earlier.
+Low‑level test backup script — works directly on a mounted dummy device.
 
 ### Setup
-
-1. Create and mount the dummy device:
-   ```bash
-   sudo bash create-test-img.sh
-   sudo mount -U <UUID> /mnt/backup
-   ```
-
-2. Run one of the following test modes:
-
-### Example – Direct Script Usage
-
-**Initial Backup:**
-```bash
-bash dummy_backup.sh -i ./mnt/backup/46/2025/rpi.img,2048,512
+```
+sudo bash create-test-img.sh
+sudo mount -U <UUID> /mnt/backup
 ```
 
-**Incremental Backup:**
-```bash
-bash dummy_backup.sh ./mnt/backup/46/2025/rpi.img
+### Run Examples
+```
+# Full (initial) backup
+bash scripts/dummy_backup.sh -i /mnt/backup/46/2025/rpi.img,2048,512
+
+# Incremental update
+bash scripts/dummy_backup.sh /mnt/backup/46/2025/rpi.img
 ```
 
 ---
 
 ## `backup-wrapper.sh`
 
-Alternatively, you can use the **wrapper script** `backup-wrapper.sh`, which provides additional control and wraps `dummy_backup.sh`.  
-This approach **does not require mounting the UUID manually** — the wrapper handles that automatically.
+High‑level wrapper around `dummy_backup.sh` that handles space checks and retention cleanup.  
+Mounting the drive manually is not required.
 
-To test with retention behavior, the environment variable `MIN_RETAIN` can be set temporarily before running the command.  
-In these examples, it is set to `2`.
-
-### Example – Wrapper Script Usage
-
-**Initial Backup Wrapper Example:**
-```bash
-MIN_RETAIN=2 bash backup-wrapper.sh \
-    --initial \
-    -s ./mnt/backup \
-    ./mnt/backup \
-    b17403dd-f4b3-4601-9514-f3bb56e90735 \
-    dummy_backup.sh \
-    ./mnt/backup/46/2025/rpi.img \
-    2048 \
-    512
+### Example – Initial Backups
+```
+for i in {1..30}; do
+  echo "[$i] Running backup (week $i)..."
+  sudo MIN_RETAIN=2 bash scripts/backup-wrapper.sh \
+    --initial -s /mnt/backup /mnt/backup dummy_backup.sh \
+    /mnt/backup/$i/2025/rpi.img 2048 512
+  echo
+done
 ```
 
-**Incremental Backup Wrapper Example:**
-```bash
-MIN_RETAIN=2 bash backup-wrapper.sh \
-    --incremental \
-    -s ./mnt/backup \
-    ./mnt/backup \
-    b17403dd-f4b3-4601-9514-f3bb56e90735 \
-    dummy_backup.sh \
-    ./mnt/backup/46/2025/rpi.img
+### Example – Incremental Backups
+```
+for i in {1..30}; do
+  echo "[$i] Running incremental backup..."
+  sudo MIN_RETAIN=2 bash scripts/backup-wrapper.sh \
+    --incremental -s /mnt/backup /mnt/backup dummy_backup.sh \
+    /mnt/backup/30/2025/rpi.img
+  echo
+done
 ```
 
-In these examples:
-- The UUID (`b17403dd-f4b3-4601-9514-f3bb56e90735`) is passed directly as an argument.
-- The environment variable `MIN_RETAIN=2` ensures a minimum of 2 backups are retained for this command only.
-- The `-s` parameter is used to override the **source directory** (where backups originate).
+Notes:
+- `MIN_RETAIN=2` keeps the two newest backups.
+- `-s` overrides the source path to measure space usage. Usally /. 
+
+---
+
+## Real Backups via systemd
+
+1. **Clone**
+   ```
+   git clone https://github.com/seamusdemora/RonR-RPi-image-utils.git
+   cd RonR-RPi-image-utils
+   ```
+
+2. **Configure `rpi-backup.sh`**
+   ```
+   WRAPPER="scripts/backup-wrapper.sh"
+   BACKUP_SCRIPT="scripts/dummy_backup.sh"   # change to the real backup script if needed
+   SRC="/"                     # source filesystem
+   MOUNT_PT="/mnt/backup"      # external SSD mount point
+   UUID="<your-SSD-UUID>"      # from create-test-img.sh or lsblk -f
+   INIT_SIZE_MB=8192
+   EXTRA_MB=512
+   MIN_RETAIN=2
+   ```
+
+3. **Install service and timers**
+   ```
+   sudo cp rpi-backup*.service rpi-backup*.timer /etc/systemd/system/
+   sudo systemctl daemon-reload
+   ```
+
+4. **Enable timers**
+   ```
+   sudo systemctl enable --now rpi-backup-weekly.timer
+   sudo systemctl enable --now rpi-backup-12h.timer
+   ```
+
+5. **Check active timers**
+   ```
+   systemctl list-timers rpi-backup*
+   ```
+
+6. **Run manually (one‑time test)**
+   ```
+   sudo systemctl start rpi-backup.service
+   ```
+
+7. **Verify results and logs**
+   ```
+   sudo ls -l /mnt/backup
+   sudo journalctl -u rpi-backup.service -e
+   ```
+
+Summary:
+- `rpi-backup-weekly.timer` → full backup every Sunday at 03:00  
+- `rpi-backup-12h.timer` → incremental backup every 12 hours  
+- `rpi-backup.service` → can be started manually anytime
 
 ---
 
 ## Notes
 
-- Manual UUID mounting is **only required when using `dummy_backup.sh` directly**.
-- The wrapper (`backup-wrapper.sh`) can handle the mounted device for you.
-- Replace placeholder paths and UUIDs with real values for your setup.
-- The `MIN_RETAIN` variable can be set to control how many backups are preserved during testing.
-- Use `--initial` for a full first-time backup and `--incremental` to update an existing backup incrementally.
-- These scripts are intended for **testing and debugging** your backup logic.
-
----
+- Manual UUID mounting is only needed when using `dummy_backup.sh` directly.  
+  The wrapper and service handle mounting for you.
+- Replace placeholder paths and UUIDs with your real setup.
+- Set `MIN_RETAIN` to adjust how many old backups are kept.
+- Use `--initial` for the first full backup, `--incremental` for updates.
+- Scripts are designed for testing and debugging of backup logic.

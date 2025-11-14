@@ -4,35 +4,43 @@
         {
             "type": "bashdb",
             "request": "launch",
+            "name": "Bash-Debug (rpi-backup.sh)",
+            "cwd": "${workspaceFolder}",
+            "program": "rpi-backup.sh",
+            "args": [],
+            "terminalKind": "integrated"
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
             "name": "Debug Initial Backup Dummy Script",
-            "program": "dummy_backup.sh",
+            "program": "scripts/dummy_backup.sh",
             "args": [
                 "-i",
-                "./mnt/backup/46/2025/rpi.img,2048,512"
+                "/mnt/backup/46/2025/rpi.img,2048,512"
             ]
         },
         {
             "type": "bashdb",
             "request": "launch",
             "name": "Debug Incremental Backup Dummy Script",
-            "program": "dummy_backup.sh",
+            "program": "scripts/dummy_backup.sh",
             "args": [
-                "./mnt/backup/46/2025/rpi.img"
+                "/mnt/backup/46/2025/rpi.img"
             ]
         },
         {
             "type": "bashdb",
             "request": "launch",
             "name": "Debug Initial Backup Wrapper Script",
-            "program": "backup-wrapper.sh",
+            "program": "scripts/backup-wrapper.sh",
             "args": [
                 "--initial",
                 "-s",
-                "./mnt/backup",
-                "./mnt/backup",
-                "433bf6f5-f5e5-4682-9bf9-d6c10b47fec5",
+                "/mnt/backup",
+                "/mnt/backup",
                 "dummy_backup.sh",
-                "./mnt/backup/52/2025/rpi.img",
+                "/mnt/backup/25/2025/rpi.img",
                 "2048",
                 "512"
             ],
@@ -45,15 +53,14 @@
             "type": "bashdb",
             "request": "launch",
             "name": "Debug Incremental Backup Wrapper Script",
-            "program": "backup-wrapper.sh",
+            "program": "scripts/backup-wrapper.sh",
             "args": [
                 "--incremental",
                 "-s",
-                "./mnt/backup",
-                "./mnt/backup",
-                "433bf6f5-f5e5-4682-9bf9-d6c10b47fec5",
+                "/mnt/backup",
+                "/mnt/backup",
                 "dummy_backup.sh",
-                "./mnt/backup/52/2025/rpi.img"
+                "/mnt/backup/25/2025/rpi.img"
             ],
             "env": {
                 "MIN_RETAIN": "2"

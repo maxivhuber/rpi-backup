@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly full Raspberry Pi image backup
+
+[Timer]
+OnCalendar=Sun 03:00
+Persistent=true
+Unit=rpi-backup.service
+
+[Install]
+WantedBy=timers.target

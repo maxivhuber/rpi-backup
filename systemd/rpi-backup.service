@@ -1,0 +1,8 @@
+[Unit]
+Description=Raspberry Pi automated image backup (weekly full or 12h incremental)
+After=local-fs.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/rpi-backup.sh
