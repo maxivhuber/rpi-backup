@@ -120,7 +120,7 @@ main() {
         local args="$image_path"
         [[ -n "$init_size" ]] && args+=",$init_size"
         [[ -n "$extra_space" ]] && args+=",$extra_space"
-        bash "./$backup_script" -i "$args"
+        bash "$backup_script" -i "$args"
     else
         bash "$backup_script" "$image_path"
     fi

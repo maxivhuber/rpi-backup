@@ -42,8 +42,8 @@ fi
 # -------------------------------------------------------------------------
 # Configurable parameters
 # -------------------------------------------------------------------------
-WRAPPER="scripts/backup-wrapper.sh"      # Path to wrapper script
-BACKUP_SCRIPT="dummy_backup.sh"  # The underlying tool
+WRAPPER="scripts/backup-wrapper.sh"      # Absolute path to wrapper script
+BACKUP_SCRIPT="dummy_backup.sh"  # Absolute path to underlying tool
 SRC="/mnt/backup"
 MOUNT_PT="/mnt/backup"
 UUID="fa89e2f8-54c0-42cc-b881-f6e9eea11646"  # External SSD UUID
