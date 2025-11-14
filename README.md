@@ -104,7 +104,7 @@ Notes:
    ```
    sudo ln -sf "$(pwd)/rpi-backup.sh" /usr/local/bin/rpi-backup.sh
    sudo chmod 755 /usr/local/bin/rpi-backup.sh
-   sudo cp rpi-backup*.service rpi-backup*.timer /etc/systemd/system/
+   sudo cp systemd/rpi-backup.service systemd/rpi-backup*.timer /etc/systemd/system/
    sudo systemctl daemon-reload
    ```
 
