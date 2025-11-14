@@ -9,7 +9,7 @@ You can simulate backups with a dummy image or run real scheduled backups via 
 
 1. **Create a dummy backup device**
    ```
-   sudo bash create-test-img.sh
+   sudo bash scripts/create-test-img.sh
    ```
    Prints a fake but usable device UUID on the last line.
 
@@ -71,19 +71,20 @@ done
 
 Notes:
 - `MIN_RETAIN=2` keeps the two newest backups.
-- `-s` overrides the source path to measure space usage. Usally /. 
+- `-s` overrides the source path to measure space usage (usually `/`).
 
 ---
 
 ## Real Backups via systemd
 
-1. **Clone**
+1. **Clone the repository**
    ```
    git clone https://github.com/seamusdemora/RonR-RPi-image-utils.git
    cd RonR-RPi-image-utils
    ```
 
 2. **Configure `rpi-backup.sh`**
+   Update the following variables inside the script:
    ```
    WRAPPER="scripts/backup-wrapper.sh"
    BACKUP_SCRIPT="scripts/dummy_backup.sh"   # change to the real backup script if needed
@@ -95,13 +96,21 @@ Notes:
    MIN_RETAIN=2
    ```
 
-3. **Install service and timers**
+3. **Install the script and systemd units**
+
+   Copy or link the main script so the service can find it.  
+   Using a symbolic link makes future git updates automatically apply:
+
    ```
+   sudo ln -sf "$(pwd)/rpi-backup.sh" /usr/local/bin/rpi-backup.sh
+   sudo chmod 755 /usr/local/bin/rpi-backup.sh
    sudo cp rpi-backup*.service rpi-backup*.timer /etc/systemd/system/
    sudo systemctl daemon-reload
    ```
 
-4. **Enable timers**
+   Note: Using `/usr/local/bin` is standard for custom system‑wide scripts.
+
+4. **Enable the timers**
    ```
    sudo systemctl enable --now rpi-backup-weekly.timer
    sudo systemctl enable --now rpi-backup-12h.timer
@@ -125,16 +134,17 @@ Notes:
 
 Summary:
 - `rpi-backup-weekly.timer` → full backup every Sunday at 03:00  
-- `rpi-backup-12h.timer` → incremental backup every 12 hours  
+- `rpi-backup-12h.timer` → incremental backup every 12 hours  
 - `rpi-backup.service` → can be started manually anytime
 
 ---
 
 ## Notes
 
-- Manual UUID mounting is only needed when using `dummy_backup.sh` directly.  
-  The wrapper and service handle mounting for you.
-- Replace placeholder paths and UUIDs with your real setup.
-- Set `MIN_RETAIN` to adjust how many old backups are kept.
-- Use `--initial` for the first full backup, `--incremental` for updates.
-- Scripts are designed for testing and debugging of backup logic.
+- Manual UUID mounting is only needed when using `dummy_backup.sh` directly — the wrapper and service handle mounting automatically.  
+- Replace placeholder paths and UUIDs with real values for your setup.  
+- Adjust `MIN_RETAIN` to control how many old backups are kept.  
+- Use `--initial` for the first full backup, `--incremental` for updates.  
+- These scripts are intended for testing and debugging of your backup logic.
+
+---
