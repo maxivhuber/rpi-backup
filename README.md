@@ -123,6 +123,7 @@ Notes:
 6. **Run manually (one‑time test)**
    ```
    sudo systemctl start rpi-backup.service
+   sudo journalctl -u rpi-backup.service -n 50 --no-pager
    ```
 
 7. **Verify results and logs**
