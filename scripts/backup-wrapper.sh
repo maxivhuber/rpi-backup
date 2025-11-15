@@ -120,8 +120,10 @@ main() {
         local args="$image_path"
         [[ -n "$init_size" ]] && args+=",$init_size"
         [[ -n "$extra_space" ]] && args+=",$extra_space"
+        echo "[INFO] Running: bash \"$backup_script\" -i \"$args\"" >&2
         bash "$backup_script" -i "$args"
     else
+        echo "[INFO] Running: bash \"$backup_script\" \"$image_path\"" >&2
         bash "$backup_script" "$image_path"
     fi
 }
