@@ -42,14 +42,14 @@ fi
 # -------------------------------------------------------------------------
 # Configurable parameters
 # -------------------------------------------------------------------------
-WRAPPER="scripts/backup-wrapper.sh"      # Absolute path to wrapper script
-BACKUP_SCRIPT="dummy_backup.sh"  # Absolute path to underlying tool
-SRC="/mnt/backup"
-MOUNT_PT="/mnt/backup"
-UUID="fa89e2f8-54c0-42cc-b881-f6e9eea11646"  # External SSD UUID
-EXTRA_MB=512
-INIT_SIZE_MB=8192
-MIN_RETAIN=2
+WRAPPER="/opt/rpi-backup/scripts/backup-wrapper.sh"      # Absolute path to wrapper script
+BACKUP_SCRIPT="/opt/RonR-RPi-image-utils/image-backup"   # Script that creates a full SD card image
+SRC="/"                                                  # Filesystem to back up ( e.g. entire OS /)
+MOUNT_PT="/mnt/backup"                                   # Mount point for backup destination
+UUID="a1b2c3d4-e5f6-7890-1234-567890abcdef"              # UUID of external SSD (use `blkid` to find)
+INIT_SIZE_MB=8192                                        # Initial image size in MB (~8 GB)
+EXTRA_MB=1024                                            # Extra space (MB) to add for safety/growth
+MIN_RETAIN=3                                             # Keep at least 3 backup images
 
 MOUNTED=0
 
