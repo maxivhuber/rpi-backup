@@ -12,12 +12,14 @@ if [[ "${1-}" =~ ^-*h(elp)?$ ]]; then
     cat <<'EOF'
 Usage:
   Initial backup:
-    ./backup-wrapper.sh --initial [-s <source-path>] <mount-point> <backup-script> <image-path> [size-MB] [extra-MB]
+    ./backup-wrapper.sh --initial [-s <source-path>] [-S <size-MB>] [-E <extra-MB>] <mount-point> <backup-script> <image-path>
   Incremental backup:
     ./backup-wrapper.sh --incremental [-s <source-path>] <mount-point> <backup-script> <image-path>
 
 Options:
   -s <path>    Source filesystem path to measure usage from (default: /)
+  -S <size>    Initial image size in MB (optional)
+  -E <extra>   Extra space in MB to allocate (optional)
 
 Environment:
   MIN_RETAIN=N   Auto-clean old backups when space is low (e.g., MIN_RETAIN=3)
@@ -84,20 +86,66 @@ check_space_or_cleanup() {
 
 main() {
     local mode source="/" mount_point backup_script image_path
-    local init_size extra_space
-    mode="$1"; shift
-    if [[ "${1-}" == "-s" ]]; then
-        [[ -n "${2-}" ]] || { echo "[ERROR] -s requires a path." >&2; exit 1; }
-        source="$2"; shift 2
+    local init_size="" extra_space=""
+
+    if [[ $# -lt 1 ]]; then
+        echo "[ERROR] Missing mode (--initial or --incremental)." >&2
+        exit 1
     fi
+
+    mode="$1"; shift
+
+    # Parse options: -s, -S, -E
+    while [[ $# -gt 0 ]] && [[ "${1-}" == -* ]]; do
+        case "$1" in
+            -s)
+                if [[ -z "${2-}" ]]; then
+                    echo "[ERROR] -s requires a path." >&2
+                    exit 1
+                fi
+                source="$2"
+                shift 2
+                ;;
+            -S)
+                if [[ -z "${2-}" ]]; then
+                    echo "[ERROR] -S requires a size (MB)." >&2
+                    exit 1
+                fi
+                init_size="$2"
+                shift 2
+                ;;
+            -E)
+                if [[ -z "${2-}" ]]; then
+                    echo "[ERROR] -E requires extra space (MB)." >&2
+                    exit 1
+                fi
+                extra_space="$2"
+                shift 2
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                # Stop at first non-option (e.g., --initial followed by positional args)
+                break
+                ;;
+        esac
+    done
+
     case "$mode" in
         --initial)
-            [[ $# -ge 3 ]] || { echo "[ERROR] Missing args for --initial." >&2; exit 1; }
+            if [[ $# -lt 3 ]]; then
+                echo "[ERROR] Missing args for --initial." >&2
+                exit 1
+            fi
             mount_point="$1"; backup_script="$2"; image_path="$3"
-            init_size="${4-}"; extra_space="${5-}"
             ;;
         --incremental)
-            [[ $# -ge 3 ]] || { echo "[ERROR] Missing args for --incremental." >&2; exit 1; }
+            if [[ $# -lt 3 ]]; then
+                echo "[ERROR] Missing args for --incremental." >&2
+                exit 1
+            fi
             mount_point="$1"; backup_script="$2"; image_path="$3"
             ;;
         *)
@@ -110,16 +158,18 @@ main() {
         echo "[ERROR] mount-point '$mount_point' must be under /mnt/backup for safety." >&2
         exit 1
     fi
+
     local available used needed
     available=$(df --block-size=1 --output=avail "$mount_point" | tail -n +2)
     used=$(df --block-size=1 --output=used "$source" | tail -n +2)
     needed=$((used + used / 16))
+
     check_space_or_cleanup "$mount_point" "$needed"
+
     [[ -f "$backup_script" ]] || { echo "[ERROR] Backup script missing: $backup_script" >&2; exit 1; }
+
     if [[ "$mode" == "--initial" ]]; then
-        local args="$image_path"
-        [[ -n "$init_size" ]] && args+=",$init_size"
-        [[ -n "$extra_space" ]] && args+=",$extra_space"
+        local args="$image_path,${init_size},${extra_space}"
         echo "[INFO] Running: bash \"$backup_script\" -i \"$args\"" >&2
         bash "$backup_script" -i "$args"
     else

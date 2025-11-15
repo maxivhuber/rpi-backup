@@ -47,9 +47,9 @@ BACKUP_SCRIPT="/opt/RonR-RPi-image-utils/image-backup"   # Script that creates a
 SRC="/"                                                  # Filesystem to back up ( e.g. entire OS /)
 MOUNT_PT="/mnt/backup"                                   # Mount point for backup destination
 UUID="a1b2c3d4-e5f6-7890-1234-567890abcdef"              # UUID of external SSD (use `blkid` to find)
-INIT_SIZE_MB=8192                                        # Initial image size in MB (~8 GB)
-EXTRA_MB=1024                                            # Extra space (MB) to add for safety/growth
-MIN_RETAIN=3                                             # Keep at least 3 backup images
+INIT_SIZE_MB=""                                          # Initial image size in MB (~8 GB)
+EXTRA_MB="1024"                                          # Extra space (MB) to add for safety/growth
+MIN_RETAIN="3"                                           # Keep at least 3 backup images
 
 MOUNTED=0
 
@@ -117,22 +117,24 @@ main() {
     mkdir -p "$week_dir"
     dow=$(date +%u)  # ISO day of week (1=Mon, 7=Sun)
 
-    # create an initial backup on Sundays OR when this week's image doesn't exist
+    # Create an initial backup on Sundays OR when this week's image doesn't exist
     if [[ "$dow" == "7" || ! -f "$img_path" ]]; then
         echo "[INFO] Creating initial full backup for week $week $year..."
+
         env MIN_RETAIN="$MIN_RETAIN" bash "$WRAPPER" --initial \
             -s "$SRC" \
+            ${INIT_SIZE_MB:+-S "$INIT_SIZE_MB"} \
+            ${EXTRA_MB:+-E "$EXTRA_MB"} \
             "$MOUNT_PT" \
             "$BACKUP_SCRIPT" \
-            "$img_path" \
-            "$INIT_SIZE_MB" \
-            "$EXTRA_MB"
+            "$img_path"
     else
         echo "[INFO] Performing incremental backup for week $week $year..."
         if [[ -f "$img_path" ]]; then
             echo "[INFO] Creating snapshot: $snapshot"
             cp --reflink=auto "$img_path" "$snapshot"
         fi
+
         env MIN_RETAIN="$MIN_RETAIN" bash "$WRAPPER" --incremental \
             -s "$SRC" \
             "$MOUNT_PT" \

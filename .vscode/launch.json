@@ -38,11 +38,13 @@
                 "--initial",
                 "-s",
                 "/mnt/backup",
+                "-S",
+                "2048",
+                "-E",
+                "512",
                 "/mnt/backup",
                 "dummy_backup.sh",
-                "/mnt/backup/25/2025/rpi.img",
-                "2048",
-                "512"
+                "/mnt/backup/25/2025/rpi.img"
             ],
             "env": {
                 "MIN_RETAIN": "2"

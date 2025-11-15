@@ -52,8 +52,8 @@ Mounting the drive manually is not required.
 for i in {1..30}; do
   echo "[$i] Running backup (week $i)..."
   sudo MIN_RETAIN=2 bash scripts/backup-wrapper.sh \
-    --initial -s /mnt/backup /mnt/backup dummy_backup.sh \
-    /mnt/backup/$i/2025/rpi.img 2048 512
+    --initial -s /mnt/backup -S 2048 -E 512 \
+    /mnt/backup dummy_backup.sh /mnt/backup/$i/2025/rpi.img
   echo
 done
 ```
@@ -63,8 +63,8 @@ done
 for i in {1..30}; do
   echo "[$i] Running incremental backup..."
   sudo MIN_RETAIN=2 bash scripts/backup-wrapper.sh \
-    --incremental -s /mnt/backup /mnt/backup dummy_backup.sh \
-    /mnt/backup/30/2025/rpi.img
+    --incremental -s /mnt/backup \
+    /mnt/backup dummy_backup.sh /mnt/backup/30/2025/rpi.img
   echo
 done
 ```
@@ -88,12 +88,12 @@ Notes:
    ```
    WRAPPER="scripts/backup-wrapper.sh"
    BACKUP_SCRIPT="scripts/dummy_backup.sh"   # change to the real backup script if needed
-   SRC="/"                     # source filesystem
-   MOUNT_PT="/mnt/backup"      # external SSD mount point
-   UUID="<your-SSD-UUID>"      # from create-test-img.sh or lsblk -f
-   INIT_SIZE_MB=8192
-   EXTRA_MB=512
-   MIN_RETAIN=2
+   SRC="/"                                   # source filesystem
+   MOUNT_PT="/mnt/backup"                    # external SSD mount point
+   UUID="<your-SSD-UUID>"                    # from create-test-img.sh or lsblk -f
+   INIT_SIZE_MB=""                           # initial root size, can be empty
+   EXTRA_MB="1024"                           # extra space for incremental backups, can be empty
+   MIN_RETAIN="3"                            # minimum of weeks to keep
    ```
 
 3. **Install the script and systemd units**
