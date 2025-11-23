@@ -1,8 +1,8 @@
 [Unit]
-Description=Weekly full Raspberry Pi image backup
+Description=Weekly full Raspberry Pi image backup (when ISO week changes)
 
 [Timer]
-OnCalendar=Sun 03:00
+OnCalendar=Mon 00:00
 Persistent=true
 Unit=rpi-backup.service
 
