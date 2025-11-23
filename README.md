@@ -117,7 +117,7 @@ Notes:
 
 5. **Check active timers**
    ```
-   systemctl list-timers rpi-backup*
+   systemctl list-unit-files | grep rpi-backup
    ```
 
 6. **Run manually (one‑time test)**
