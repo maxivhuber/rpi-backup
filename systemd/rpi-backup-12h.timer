@@ -2,7 +2,8 @@
 Description=12-hour incremental Raspberry Pi image backup
 
 [Timer]
-OnCalendar=*-*-* 00,12:00:00
+OnCalendar=Mon 12:00:00
+OnCalendar=Tue..Sun 00,12:00:00
 Persistent=true
 Unit=rpi-backup.service
 
