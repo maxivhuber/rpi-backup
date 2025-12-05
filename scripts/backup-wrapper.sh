@@ -145,14 +145,16 @@ main() {
     fi
     if [[ "$mode" == "--initial" ]]; then
         local args="$image_path,${init_size},${extra_space}"
-        echo "[INFO] Running INITIAL: bash \"$backup_script\" -i \"$args\" ${opts:+-o \"$opts\"}" >&2
+        printf -v pretty_opts '%s ' "${OPTIONS[@]}"
+        echo "[INFO] Running INITIAL: bash \"$backup_script\" -i \"$args\" ${pretty_opts:+-o \"$pretty_opts\"}" >&2
         if [[ -n "$opts" ]]; then
             bash "$backup_script" -i "$args" -o "$opts"
         else
             bash "$backup_script" -i "$args"
         fi
     else
-        echo "[INFO] Running INCREMENTAL: bash \"$backup_script\" ${opts:+-o \"$opts\"} \"$image_path\"" >&2
+        printf -v pretty_opts '%s ' "${OPTIONS[@]}"
+        echo "[INFO] Running INCREMENTAL: bash \"$backup_script\" ${pretty_opts:+-o \"$pretty_opts\"} \"$image_path\"" >&2
         if [[ -n "$opts" ]]; then
             bash "$backup_script" -o "$opts" "$image_path"
         else
