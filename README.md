@@ -65,7 +65,7 @@ for i in {1..30}; do
   echo "[$i] Running incremental backup..."
   sudo MIN_RETAIN=2 bash scripts/backup-wrapper.sh \
     --incremental -s /mnt/backup \
-    -o "exclude=/tmp" \
+    -o "exclude=/tmp,exclude=/var/log" \
     /mnt/backup dummy_backup.sh /mnt/backup/30/2025/rpi.img
   echo
 done

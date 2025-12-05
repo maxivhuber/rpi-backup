@@ -98,7 +98,9 @@ main() {
             -o|--options)
                 local raw="${2-}"
                 IFS=',' read -ra tmp <<< "$raw"
-                OPTIONS+=("${tmp[@]}")
+                for t in "${tmp[@]}"; do
+                    OPTIONS+=( "--$t" )
+                done
                 shift 2
                 ;;
             --)
