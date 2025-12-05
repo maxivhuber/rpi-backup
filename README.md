@@ -22,54 +22,57 @@ You can simulate backups with a dummy image or run real scheduled backups via 
 ---
 
 ## `dummy_backup.sh`
-
 Low‑level test backup script — works directly on a mounted dummy device.
 
 ### Setup
 ```
-sudo bash create-test-img.sh
+sudo bash scripts/create-test-img.sh
 sudo mount -U <UUID> /mnt/backup
 ```
 
 ### Run Examples
 ```
-# Full (initial) backup
-bash scripts/dummy_backup.sh -i /mnt/backup/46/2025/rpi.img,2048,512
+# Full (initial) backup (supports optional -o <opts>)
+sudo bash scripts/dummy_backup.sh -i -o "exclude=/tmp,exclude=/var/log" /mnt/backup/46/2025/rpi.img,2048,512
 
-# Incremental update
-bash scripts/dummy_backup.sh /mnt/backup/46/2025/rpi.img
+# Incremental update (also supports -o <opts>)
+sudo bash scripts/dummy_backup.sh -o "exclude=/tmp" /mnt/backup/46/2025/rpi.img
 ```
+
+### Notes
+- `<opts>` is a comma‑separated list of rsync‑style options.  
 
 ---
 
 ## `backup-wrapper.sh`
-
 High‑level wrapper around `dummy_backup.sh` that handles space checks and retention cleanup.  
-Mounting the drive manually is not required.
 
-### Example – Initial Backups
+### Example – Initial Backups (with optional exclude paths)
 ```
 for i in {1..30}; do
   echo "[$i] Running backup (week $i)..."
   sudo MIN_RETAIN=2 bash scripts/backup-wrapper.sh \
     --initial -s /mnt/backup -S 2048 -E 512 \
+    -o "exclude=/tmp,exclude=/var/log" \
     /mnt/backup dummy_backup.sh /mnt/backup/$i/2025/rpi.img
   echo
 done
 ```
 
-### Example – Incremental Backups
+### Example – Incremental Backups (with optional exclude paths)
 ```
 for i in {1..30}; do
   echo "[$i] Running incremental backup..."
   sudo MIN_RETAIN=2 bash scripts/backup-wrapper.sh \
     --incremental -s /mnt/backup \
+    -o "exclude=/tmp" \
     /mnt/backup dummy_backup.sh /mnt/backup/30/2025/rpi.img
   echo
 done
 ```
 
 Notes:
+- `-o "<opts>"` passes exclude rules (comma‑separated) to the underlying backup script.
 - `MIN_RETAIN=2` keeps the two newest backups.
 - `-s` overrides the source path to measure space usage (usually `/`).
 
