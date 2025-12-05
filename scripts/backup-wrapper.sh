@@ -129,8 +129,7 @@ main() {
         echo "[ERROR] mount-point must be under /mnt/backup." >&2
         exit 1
     fi
-    local available used needed
-    available=$(df --block-size=1 --output=avail "$mount_point" | tail -n +2)
+    local used needed
     used=$(df --block-size=1 --output=used "$source" | tail -n +2)
     needed=$(( used + used / 16 ))
     check_space_or_cleanup "$mount_point" "$needed"

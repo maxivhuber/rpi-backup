@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
-# rpi-backup.sh - Automated Raspberry Pi image backup
 set -o errexit
 set -o nounset
 set -o pipefail
 if [[ "${TRACE-0}" == "1" ]]; then
     set -o xtrace
 fi
-
 if [[ "${1-}" =~ ^-*h(elp)?$ ]]; then
     cat <<'EOF'
 Usage: ./rpi-backup.sh
@@ -23,14 +21,11 @@ Enable debug tracing with:
 EOF
     exit 0
 fi
-
 cd "$(dirname "$0")"
-
 if [[ $EUID -ne 0 ]]; then
     echo "[ERROR] This script must be run as root. Try: sudo $0" >&2
     exit 1
 fi
-
 # Configurable parameters
 WRAPPER="/opt/rpi-backup/scripts/backup-wrapper.sh"      # High-level wrapper that manages space + retention
 BACKUP_SCRIPT="/opt/RonR-RPi-image-utils/image-backup"   # Actual image creation script (RonR RPi utility)
@@ -42,7 +37,6 @@ EXTRA_MB="1024"                                          # Extra MB to allocate 
 MIN_RETAIN="3"                                           # Minimum weekly backups to retain
 MOUNTED=0                                                # Set to 1 when SSD is mounted
 EXCLUDES="exclude=/tmp,exclude=/var/log"                 # Excludes passed to backup-wrapper (-o)
-
 cleanup() {
     local exit_code=$?
     if [[ $MOUNTED -eq 1 && -d "$MOUNT_PT" && -e "/dev/disk/by-uuid/$UUID" ]]; then
@@ -56,7 +50,6 @@ cleanup() {
     return "$exit_code"
 }
 trap cleanup EXIT
-
 check_reflink_fs() {
     local mount_point="$1"
     local fstype
@@ -75,7 +68,6 @@ check_reflink_fs() {
             ;;
     esac
 }
-
 mount_ssd() {
     if [[ ! -e "/dev/disk/by-uuid/$UUID" ]]; then
         echo "[ERROR] External SSD not connected (UUID=$UUID)." >&2
@@ -89,26 +81,18 @@ mount_ssd() {
         MOUNTED=1
     fi
 }
-
 main() {
     local week year week_dir img_path timestamp snapshot dow
-
     mount_ssd
     check_reflink_fs "$MOUNT_PT"
-
     week=$(date +%V)
     year=$(date +%Y)
-
     week_dir="${MOUNT_PT}/${week}/${year}"
     img_path="${week_dir}/rpi.img"
-
     timestamp=$(date +%Y-%m-%d_%H%M)
     snapshot="${week_dir}/rpi_${timestamp}.img"
-
     mkdir -p "$week_dir"
-
     dow=$(date +%u)
-
     if [[ "$dow" == "7" || ! -f "$img_path" ]]; then
         echo "[INFO] Creating initial full backup for week $week $year..."
         env MIN_RETAIN="$MIN_RETAIN" bash "$WRAPPER" --initial \
@@ -121,12 +105,10 @@ main() {
             "$img_path"
     else
         echo "[INFO] Performing incremental backup for week $week $year..."
-
         if [[ -f "$img_path" ]]; then
             echo "[INFO] Creating snapshot: $snapshot"
             cp --reflink=auto "$img_path" "$snapshot"
         fi
-
         env MIN_RETAIN="$MIN_RETAIN" bash "$WRAPPER" --incremental \
             -s "$SRC" \
             -o "$EXCLUDES" \
@@ -135,5 +117,4 @@ main() {
             "$img_path"
     fi
 }
-
 main "$@"
