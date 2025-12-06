@@ -80,10 +80,11 @@ Notes:
 
 ## Real Backups via systemd
 
-1. **Clone the repository**
+1. **Clone the repositorys**
    ```
    git clone https://github.com/seamusdemora/RonR-RPi-image-utils.git
-   cd RonR-RPi-image-utils
+   git clone https://github.com/maxivhuber/rpi-backup.git
+   cd rpi-backup
    ```
 
 2. **Configure `rpi-backup.sh`**
