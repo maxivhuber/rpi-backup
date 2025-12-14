@@ -144,11 +144,10 @@ Summary:
 ---
 
 ## Notes
-
 - Manual UUID mounting is only needed when using `dummy_backup.sh` directly — the wrapper and service handle mounting automatically.  
 - Replace placeholder paths and UUIDs with real values for your setup.  
 - Adjust `MIN_RETAIN` to control how many old backups are kept.  
 - Use `--initial` for the first full backup, `--incremental` for updates.  
-- These scripts are intended for testing and debugging of your backup logic.
+- The timestamped image files (e.g., `rpi_2025-12-08_1200.img`) are reflink snapshots taken before each incremental backup runs and reflect the state of the previous backup, not the system at the time in the filename. The main image file (`rpi.img`) is always updated after the snapshot and represents the latest system state.
 
 ---
